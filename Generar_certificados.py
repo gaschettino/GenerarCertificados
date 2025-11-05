@@ -13,12 +13,11 @@ import shutil
 st.set_page_config(page_title="Generador de Certificados", page_icon="🎓", layout="centered")
 
 st.title("🎓 Generador de Certificados")
-st.write("Subí tus archivos de asistencia y el template PowerPoint para generar certificados automáticamente en formato PPTX y PDF.")
+st.write("Subí tu plantilla de certificado y el listado de asistentes para generar automáticamente los certificados en formato PPTX y PDF.")
 
 # --- Subida de archivos ---
 uploaded_template = st.file_uploader("📄 Subí el template (.pptx)", type=["pptx"])
-uploaded_excel1 = st.file_uploader("📘 Subí listado presencial (.xlsx)")
-uploaded_excel2 = st.file_uploader("📗 Subí listado virtual (.xlsx)")
+uploaded_excel = st.file_uploader("📘 Subí el listado de asistentes (.xlsx)")
 
 # --- Función para convertir PPTX → PDF usando LibreOffice ---
 def convert_to_pdf(input_pptx, output_dir):
@@ -35,46 +34,42 @@ def convert_to_pdf(input_pptx, output_dir):
         print(f"Error al convertir {input_pptx}: {e}")
 
 # --- Lógica principal ---
-if uploaded_template and uploaded_excel1 and uploaded_excel2:
+if uploaded_template and uploaded_excel:
     if st.button("🚀 Generar certificados"):
         with st.spinner("Generando certificados..."):
             with tempfile.TemporaryDirectory() as tmpdir:
-                # Guardar archivos subidos en el directorio temporal
+                # Guardar archivos subidos
                 template_path = os.path.join(tmpdir, "template.pptx")
                 with open(template_path, "wb") as f:
                     f.write(uploaded_template.read())
 
-                # Leer los Excel
-                df1 = pd.read_excel(uploaded_excel1)
-                df2 = pd.read_excel(uploaded_excel2)
+                # Leer el Excel
+                df = pd.read_excel(uploaded_excel)
 
-                # Filtrar asistentes presenciales
-                df1_asistentes = df1[
-                    (df1["Cargo"].str.lower() == "asistente")
-                    & (df1["Asistió"].str.upper() == "SI")
-                ].copy()
+                # Normalizar columnas
+                df.columns = df.columns.str.strip().str.title()
 
-                # Crear columna unificada de nombres
-                df1_asistentes["Nombre y apellido"] = (
-                    df1_asistentes["Apellido"].str.strip() + " " + df1_asistentes["Nombre"].str.strip()
-                ).str.title()
+                # Si tiene columnas "Apellido" y "Nombre", combinarlas
+                if "Apellido" in df.columns and "Nombre" in df.columns:
+                    df["Nombre y apellido"] = (
+                        df["Apellido"].astype(str).str.strip() + " " + df["Nombre"].astype(str).str.strip()
+                    ).str.title()
+                elif "Nombre Y Apellido" in df.columns:
+                    df["Nombre y apellido"] = df["Nombre Y Apellido"].astype(str).str.title()
+                else:
+                    st.error("No se encontró una columna de nombre adecuada (Apellido/Nombre o Nombre y Apellido).")
+                    st.stop()
 
-                df2["Nombre y apellido"] = (
-                    df2["Apellido"].str.strip() + " " + df2["Nombre"].str.strip()
-                ).str.title()
-
-                # Combinar ambos listados
-                df_final = pd.concat(
-                    [df1_asistentes[["Nombre y apellido"]], df2[["Nombre y apellido"]]],
-                    ignore_index=True,
-                ).drop_duplicates().reset_index(drop=True)
+                # Si existe una columna Asistió, filtrar por 'SI'
+                if "Asistió" in df.columns:
+                    df = df[df["Asistió"].astype(str).str.upper() == "SI"]
 
                 # Crear carpeta de salida
                 output_dir = os.path.join(tmpdir, "Certificados")
                 os.makedirs(output_dir, exist_ok=True)
 
                 # Generar certificados
-                for nombre in df_final["Nombre y apellido"]:
+                for nombre in df["Nombre y apellido"].dropna().unique():
                     prs = Presentation(template_path)
                     for slide in prs.slides:
                         for shape in slide.shapes:
@@ -96,14 +91,13 @@ if uploaded_template and uploaded_excel1 and uploaded_excel2:
                     # Convertir a PDF
                     convert_to_pdf(output_pptx, output_dir)
 
-                # Crear archivo ZIP con todo
+                # Crear archivo ZIP con todos los certificados
                 zip_path = os.path.join(tmpdir, "certificados.zip")
                 shutil.make_archive(zip_path.replace(".zip", ""), "zip", output_dir)
 
-                # Mostrar mensaje de éxito
+                # Mostrar mensaje y botón de descarga
                 st.success("✅ Certificados generados correctamente.")
-                st.write("Podés descargar todos los archivos a continuación:")
+                st.write("Podés descargar todos los certificados a continuación:")
 
-                # Botón de descarga
                 with open(zip_path, "rb") as f:
                     st.download_button("⬇️ Descargar ZIP", f, "certificados.zip", "application/zip")
