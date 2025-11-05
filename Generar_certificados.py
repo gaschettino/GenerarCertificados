@@ -12,12 +12,13 @@ import shutil
 # --- Configuración de la página ---
 st.set_page_config(page_title="Generador de Certificados", page_icon="🎓", layout="centered")
 
-st.title("🎓 Generador de Certificados")
-st.write("Subí tu plantilla de certificado y el listado de asistentes para generar automáticamente los certificados en formato PPTX y PDF.")
+st.title("Generador de Certificados")
+st.write("")
+st.write("Cualquier consulta enviar mail a gaschettino@garrahan.gov.ar")
 
 # --- Subida de archivos ---
-uploaded_template = st.file_uploader("📄 Subí el template (.pptx)", type=["pptx"])
-uploaded_excel = st.file_uploader("📘 Subí el listado de asistentes (.xlsx)")
+uploaded_template = st.file_uploader("Subí el template del certificado (.pptx)", type=["pptx"])
+uploaded_excel = st.file_uploader("Subí el listado de asistentes (.xlsx). Tiene que tener dos columnas: 'Nombre' y 'Apellido'")
 
 # --- Función para convertir PPTX → PDF usando LibreOffice ---
 def convert_to_pdf(input_pptx, output_dir):
@@ -33,7 +34,6 @@ def convert_to_pdf(input_pptx, output_dir):
     except Exception as e:
         print(f"Error al convertir {input_pptx}: {e}")
 
-# --- Lógica principal ---
 if uploaded_template and uploaded_excel:
     if st.button("🚀 Generar certificados"):
         with st.spinner("Generando certificados..."):
@@ -81,7 +81,7 @@ if uploaded_template and uploaded_excel:
                                             run.font.name = "Quintessential"
                                             run.font.size = Pt(20)
                                             run.font.italic = True
-                                            run.font.color.rgb = RGBColor(0, 176, 240)
+                                            run.font.color.rgb = RGBColor(0, 0, 0)
                                     paragraph.alignment = PP_ALIGN.CENTER
 
                     # Guardar PPTX
@@ -95,9 +95,9 @@ if uploaded_template and uploaded_excel:
                 zip_path = os.path.join(tmpdir, "certificados.zip")
                 shutil.make_archive(zip_path.replace(".zip", ""), "zip", output_dir)
 
-                # Mostrar mensaje y botón de descarga
-                st.success("✅ Certificados generados correctamente.")
+                st.success("Certificados generados correctamente.")
                 st.write("Podés descargar todos los certificados a continuación:")
 
                 with open(zip_path, "rb") as f:
-                    st.download_button("⬇️ Descargar ZIP", f, "certificados.zip", "application/zip")
+                    st.download_button("Descargar ZIP", f, "certificados.zip", "application/zip")
+
