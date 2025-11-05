@@ -10,7 +10,7 @@ import subprocess
 import shutil
 
 # --- Configuración de la página ---
-st.set_page_config(page_title="Generador de Certificados", page_icon="🎓", layout="centered")
+st.set_page_config(page_title="Generador de Certificados", layout="centered")
 
 st.title("Generador de Certificados")
 st.write("")
@@ -24,15 +24,22 @@ uploaded_excel = st.file_uploader("Subí el listado de asistentes (.xlsx). Tiene
 def convert_to_pdf(input_pptx, output_dir):
     """Convierte un archivo .pptx a .pdf usando LibreOffice (modo headless)."""
     try:
-        subprocess.run([
+        result = subprocess.run([
             "libreoffice",
             "--headless",
             "--convert-to", "pdf",
             "--outdir", output_dir,
             input_pptx
-        ], check=True)
+        ], check=True, capture_output=True, text=True)
+        
+        # Si la conversión fue exitosa, eliminar el archivo PPTX
+        if result.returncode == 0:
+            os.remove(input_pptx)
+            return True
+        return False
     except Exception as e:
         print(f"Error al convertir {input_pptx}: {e}")
+        return False
 
 if uploaded_template and uploaded_excel:
     if st.button("🚀 Generar certificados"):
@@ -68,8 +75,15 @@ if uploaded_template and uploaded_excel:
                 output_dir = os.path.join(tmpdir, "Certificados")
                 os.makedirs(output_dir, exist_ok=True)
 
+                # Contadores para el progreso
+                total_nombres = len(df["Nombre y apellido"].dropna().unique())
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+
                 # Generar certificados
-                for nombre in df["Nombre y apellido"].dropna().unique():
+                for i, nombre in enumerate(df["Nombre y apellido"].dropna().unique()):
+                    status_text.text(f"Procesando: {nombre} ({i+1}/{total_nombres})")
+                    
                     prs = Presentation(template_path)
                     for slide in prs.slides:
                         for shape in slide.shapes:
@@ -84,20 +98,38 @@ if uploaded_template and uploaded_excel:
                                             run.font.color.rgb = RGBColor(0, 0, 0)
                                     paragraph.alignment = PP_ALIGN.CENTER
 
-                    # Guardar PPTX
-                    output_pptx = os.path.join(output_dir, f"Certificado_{nombre}.pptx")
+                    # Guardar PPTX temporal
+                    safe_name = "".join(c for c in nombre if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                    safe_name = safe_name.replace(' ', '_')
+                    output_pptx = os.path.join(output_dir, f"Certificado_{safe_name}.pptx")
                     prs.save(output_pptx)
 
-                    # Convertir a PDF
+                    # Convertir a PDF y eliminar PPTX
                     convert_to_pdf(output_pptx, output_dir)
+                    
+                    # Actualizar barra de progreso
+                    progress_bar.progress((i + 1) / total_nombres)
 
-                # Crear archivo ZIP con todos los certificados
+                status_text.text("Procesamiento completado")
+
+                # Verificar que solo hay PDFs en la carpeta
+                archivos_finales = os.listdir(output_dir)
+                pdf_count = len([f for f in archivos_finales if f.endswith('.pdf')])
+                pptx_count = len([f for f in archivos_finales if f.endswith('.pptx')])
+                
+                st.info(f"Se generaron {pdf_count} archivos PDF. Archivos PPTX eliminados: {pptx_count}")
+
+                # Crear archivo ZIP con todos los certificados PDF
                 zip_path = os.path.join(tmpdir, "certificados.zip")
                 shutil.make_archive(zip_path.replace(".zip", ""), "zip", output_dir)
 
-                st.success("Certificados generados correctamente.")
-                st.write("Podés descargar todos los certificados a continuación:")
+                st.success("Certificados PDF generados correctamente.")
+                st.write("Podés descargar todos los certificados PDF a continuación:")
 
                 with open(zip_path, "rb") as f:
-                    st.download_button("Descargar ZIP", f, "certificados.zip", "application/zip")
-
+                    st.download_button(
+                        "Descargar Certificados PDF", 
+                        f, 
+                        "certificados.pdf.zip", 
+                        "application/zip"
+                    )
