@@ -95,7 +95,7 @@ if uploaded_template and uploaded_excel:
                                             run.font.name = "Quintessential"
                                             run.font.size = Pt(25)
                                             run.font.italic = True
-                                            run.font-weight: bold
+                                            run.font.weight = bold
                                             run.font.color.rgb = RGBColor(0, 0, 0)
                                     paragraph.alignment = PP_ALIGN.CENTER
 
@@ -134,4 +134,5 @@ if uploaded_template and uploaded_excel:
                         "certificados.pdf.zip", 
                         "application/zip"
                     )
+
 
