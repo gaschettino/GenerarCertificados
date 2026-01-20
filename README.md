@@ -8,6 +8,7 @@ Aplicación web desarrollada con Streamlit para generar certificados personaliza
 
 La aplicación completa automáticamente el Nombre, apellido y opcionalmente el DNI de cada persona, permitiendo configurar fuente, tamaño y color del texto desde la interfaz.
 
+
 ## Selección de archivos
 
 ### Requisitos del Template (.pptx)
@@ -20,10 +21,12 @@ Es importante respetar mayúsculas, minúsculas y espacios.
 La fuente, tamaño y color definidos en el PPTX original serán reemplazados por los valores configurados en la app
 
 
+
 ### Requisitos del archivo Excel (XLSX)
 
 
 Debe contener obligatoriamente las columnas: Nombre, Apellido y opcionalmente la columna DNI.
+
 
 
 ## Configuración visual
@@ -45,9 +48,11 @@ Todos los PDFs se comprimen juntos en un archivo ZIP
 
 Este proceso puede tardar unos minutos, dependiendo la cantidad de certificados a realizar.
 
-## Generación de certificados
+## Descarga de certificados
 
 Una vez finalizada la generación se habilita la descarga directa desde la app
+
+
 
 
 ---- 
