@@ -84,12 +84,6 @@ with col2:
 # =========================
 incluye_dni = st.checkbox("El certificado incluye DNI")
 
-if incluye_dni:
-    st.info(
-        "El Excel debe tener una columna 'DNI' "
-        "y el template debe incluir el texto 'Numero de DNI' que será reemplazado."
-    )
-
 st.divider()
 
 # =========================
@@ -334,6 +328,7 @@ if uploaded_template and uploaded_excel:
                         "certificados.zip",
                         "application/zip"
                     )
+
 
 
 
