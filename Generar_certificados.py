@@ -40,13 +40,9 @@ with st.expander("Ayuda: formato de los archivos requeridos"):
 
 El archivo **PPTX** debe cumplir con lo siguiente:
 
-- El texto donde irá el nombre debe contener **exactamente** el texto:
+- El texto donde irá el nombre debe contener **exactamente** el texto: **Nombre y apellido**
 
-**Nombre y apellido**
-
-- Si el certificado incluye DNI, el template debe contener el texto:
-
-**Numero de DNI**
+- Si el certificado incluye DNI, el template debe contener el texto: **Numero de DNI**
 
 Ese texto será reemplazado automáticamente por los datos del Excel.
 
@@ -338,5 +334,6 @@ if uploaded_template and uploaded_excel:
                         "certificados.zip",
                         "application/zip"
                     )
+
 
 
