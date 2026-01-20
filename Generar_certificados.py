@@ -96,7 +96,7 @@ if uploaded_template and uploaded_excel:
                                             run.font.size = Pt(25)
                                             run.font.italic = True
                                             run.font.bold = True
-                                            run.font.color.rgb = RGBColor(49, 46, 171)
+                                            run.font.color.rgb = RGBColor(25, 24, 112)
                                     paragraph.alignment = PP_ALIGN.CENTER
 
                     # Guardar PPTX temporal
@@ -134,6 +134,7 @@ if uploaded_template and uploaded_excel:
                         "certificados.pdf.zip", 
                         "application/zip"
                     )
+
 
 
 
