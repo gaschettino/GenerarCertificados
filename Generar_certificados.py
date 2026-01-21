@@ -23,15 +23,7 @@ def css_font(f):
 st.set_page_config(page_title="Generador de Certificados", layout="centered")
 
 st.title("Generador de Certificados")
-st.write("Cualquier consulta enviar mail a gaschettino@garrahan.gov.ar")
-st.markdown(
-    """
-<p style="font-size:13px; color:gray; margin-top:0;">
-Cualquier consulta enviar mail a gaschettino@garrahan.gov.ar
-</p>
-""",
-    unsafe_allow_html=True
-)
+
 # =========================
 # Subida de archivos (2 columnas)
 # =========================
@@ -256,6 +248,15 @@ st.caption(
 
 st.divider()
 
+st.markdown(
+    """
+<p style="font-size:11px; color:gray; margin-top:0;">
+Cualquier consulta o problema enviar mail a gaschettino@garrahan.gov.ar
+</p>
+""",
+    unsafe_allow_html=True
+)
+
 # =========================
 # Conversión PPTX → PDF
 # =========================
@@ -335,6 +336,7 @@ if uploaded_template and uploaded_excel:
                         "certificados.zip",
                         "application/zip"
                     )
+
 
 
 
